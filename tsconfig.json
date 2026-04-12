@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "dist",
+    "rootDir": ".",
+    "declaration": true,
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "index.ts",
+    "credentials/**/*.ts",
+    "nodes/**/*.ts",
+    "utils/**/*.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": ["dist", "node_modules"]
+}

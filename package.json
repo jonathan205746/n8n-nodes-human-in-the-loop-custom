@@ -1,0 +1,63 @@
+{
+  "name": "n8n-nodes-human-in-the-loop-custom",
+  "version": "0.1.0",
+  "description": "n8n Community Node for human-in-the-loop link generation and wait/resume workflows",
+  "license": "MIT",
+  "homepage": "https://github.com/chrishdx/n8n-nodes-human-in-the-loop-custom",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "human-in-the-loop",
+    "approval",
+    "ai-agent"
+  ],
+  "author": "Christian Schindler <chrishdx@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrishdx/n8n-nodes-human-in-the-loop-custom.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chrishdx/n8n-nodes-human-in-the-loop-custom/issues"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json --watch",
+    "dev": "npm run build:watch",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "lint:fix": "npm run lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "release": "npm run lint && npm run test && npm run build",
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": false,
+    "credentials": [
+      "dist/credentials/HitlSigningApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/CreateHitlLink/CreateHitlLink.node.js",
+      "dist/nodes/WaitForHitlResponse/WaitForHitlResponse.node.js"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.8"
+  }
+}
