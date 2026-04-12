@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "n8n Community Node for human-in-the-loop link generation and wait/resume workflows",
   "license": "MIT",
-  "homepage": "https://github.com/chrishdx/n8n-nodes-human-in-the-loop-custom",
+  "homepage": "https://github.com/DNAngelX/n8n-nodes-human-in-the-loop-custom",
   "keywords": [
     "n8n-community-node-package",
     "n8n",
@@ -11,13 +11,13 @@
     "approval",
     "ai-agent"
   ],
-  "author": "Christian Schindler <chrishdx@gmail.com>",
+  "author": "DNAngelX <stolly82@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrishdx/n8n-nodes-human-in-the-loop-custom.git"
+    "url": "https://github.com/DNAngelX/n8n-nodes-human-in-the-loop-custom.git"
   },
   "bugs": {
-    "url": "https://github.com/chrishdx/n8n-nodes-human-in-the-loop-custom/issues"
+    "url": "https://github.com/DNAngelX/n8n-nodes-human-in-the-loop-custom/issues"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

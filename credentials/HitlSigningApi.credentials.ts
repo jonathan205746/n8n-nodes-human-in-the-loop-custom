@@ -5,7 +5,7 @@ export class HitlSigningApi implements ICredentialType {
 
   displayName = 'HITL Signing Secret';
 
-  documentationUrl = 'https://github.com/chrishdx/n8n-nodes-human-in-the-loop-custom';
+  documentationUrl = 'https://github.com/DNAngelX/n8n-nodes-human-in-the-loop-custom';
 
   properties: INodeProperties[] = [
     {
