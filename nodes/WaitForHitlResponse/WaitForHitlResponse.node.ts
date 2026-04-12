@@ -12,25 +12,59 @@ import { ReplayGuard, escapeHtml, formatIsoOrThrow, verifyToken } from '../../ut
 
 const replayGuard = new ReplayGuard();
 
-function renderPage(title: string, message: string): string {
+interface PageTheme {
+  heading: string;
+  styleBarText: string;
+  styleBarColor: string;
+  customCss: string;
+}
+
+function normalizeColor(input: string): string {
+  const value = input.trim();
+  if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value)) {
+    return value;
+  }
+  return '#0f766e';
+}
+
+function sanitizeCss(input: string): string {
+  if (!input) {
+    return '';
+  }
+  const withoutTags = input.replace(/[<>]/g, '');
+  return withoutTags.slice(0, 6000);
+}
+
+function normalizeLabel(input: string, fallback: string): string {
+  const value = input.trim();
+  return value || fallback;
+}
+
+function renderPage(params: { title: string; message: string; theme: PageTheme }): string {
   return `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(title)}</title>
+  <title>${escapeHtml(params.title)}</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; margin: 24px; color: #1f2937; }
+    body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; margin: 0; color: #1f2937; background: #f8fafc; }
+    .stylebar { background: ${escapeHtml(params.theme.styleBarColor)}; color: #ffffff; padding: 12px 20px; font-weight: 600; letter-spacing: 0.2px; }
+    .wrap { margin: 24px; }
     .card { max-width: 680px; padding: 20px; border: 1px solid #d1d5db; border-radius: 10px; }
     h1 { margin-top: 0; font-size: 22px; }
     p { line-height: 1.45; }
     a { color: #1d4ed8; }
+    ${params.theme.customCss}
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>${escapeHtml(title)}</h1>
-    <p>${escapeHtml(message)}</p>
+  <div class="stylebar">${escapeHtml(params.theme.styleBarText)}</div>
+  <div class="wrap">
+    <div class="card">
+      <h1>${escapeHtml(params.title)}</h1>
+      <p>${escapeHtml(params.message)}</p>
+    </div>
   </div>
 </body>
 </html>`;
@@ -38,7 +72,12 @@ function renderPage(title: string, message: string): string {
 
 function renderRespondForm(params: {
   requestId: string;
+  heading: string;
   question: string;
+  styleBarText: string;
+  styleBarColor: string;
+  customCss: string;
+  submitLabel: string;
   nonce: string;
   exp: number;
   sig: string;
@@ -49,31 +88,37 @@ function renderRespondForm(params: {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Provide HITL Response</title>
+  <title>${escapeHtml(params.heading)}</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; margin: 24px; color: #111827; }
+    body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; margin: 0; color: #111827; background: #f8fafc; }
+    .stylebar { background: ${escapeHtml(params.styleBarColor)}; color: #ffffff; padding: 12px 20px; font-weight: 600; letter-spacing: 0.2px; }
+    .wrap { margin: 24px; }
     .card { max-width: 760px; padding: 20px; border: 1px solid #d1d5db; border-radius: 10px; }
     label { display: block; font-weight: 600; margin-bottom: 8px; }
     textarea { width: 100%; min-height: 180px; padding: 10px; border: 1px solid #9ca3af; border-radius: 8px; font: inherit; }
     button { margin-top: 12px; background: #0f766e; color: #fff; border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; }
     .meta { margin-top: 12px; color: #6b7280; font-size: 13px; }
+    ${params.customCss}
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Provide HITL Response</h1>
-    <p><strong>Question:</strong> ${escapeHtml(params.question || '(no question provided)')}</p>
-    <form method="post" action="${escapeHtml(params.actionUrl)}">
-      <input type="hidden" name="requestId" value="${escapeHtml(params.requestId)}" />
-      <input type="hidden" name="decision" value="respond" />
-      <input type="hidden" name="nonce" value="${escapeHtml(params.nonce)}" />
-      <input type="hidden" name="exp" value="${escapeHtml(String(params.exp))}" />
-      <input type="hidden" name="sig" value="${escapeHtml(params.sig)}" />
-      <label for="answer">Response</label>
-      <textarea id="answer" name="answer" required></textarea>
-      <button type="submit">Submit</button>
-    </form>
-    <div class="meta">Request ID: ${escapeHtml(params.requestId)}</div>
+  <div class="stylebar">${escapeHtml(params.styleBarText)}</div>
+  <div class="wrap">
+    <div class="card">
+      <h1>${escapeHtml(params.heading)}</h1>
+      <p><strong>Question:</strong> ${escapeHtml(params.question || '(no question provided)')}</p>
+      <form method="post" action="${escapeHtml(params.actionUrl)}">
+        <input type="hidden" name="requestId" value="${escapeHtml(params.requestId)}" />
+        <input type="hidden" name="decision" value="respond" />
+        <input type="hidden" name="nonce" value="${escapeHtml(params.nonce)}" />
+        <input type="hidden" name="exp" value="${escapeHtml(String(params.exp))}" />
+        <input type="hidden" name="sig" value="${escapeHtml(params.sig)}" />
+        <label for="answer">Response</label>
+        <textarea id="answer" name="answer" required></textarea>
+        <button type="submit">${escapeHtml(params.submitLabel)}</button>
+      </form>
+      <div class="meta">Request ID: ${escapeHtml(params.requestId)}</div>
+    </div>
   </div>
 </body>
 </html>`;
@@ -81,6 +126,24 @@ function renderRespondForm(params: {
 
 function stringField(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
+}
+
+function rawStringField(value: unknown): string {
+  return typeof value === 'string' ? value : '';
+}
+
+function getThemeFromTokenData(data: {
+  pageHeading: string;
+  styleBarText: string;
+  styleBarColor: string;
+  customCss: string;
+}): PageTheme {
+  return {
+    heading: normalizeLabel(data.pageHeading, 'Human Review Required'),
+    styleBarText: normalizeLabel(data.styleBarText, 'Human in the Loop'),
+    styleBarColor: normalizeColor(data.styleBarColor),
+    customCss: sanitizeCss(data.customCss),
+  };
 }
 
 function extractTokenData(
@@ -94,6 +157,13 @@ function extractTokenData(
   exp: string;
   sig: string;
   question: string;
+  pageHeading: string;
+  styleBarText: string;
+  styleBarColor: string;
+  approveButtonLabel: string;
+  rejectButtonLabel: string;
+  respondButtonLabel: string;
+  customCss: string;
   answerText: string;
 } {
   const source = method === 'POST' ? { ...query, ...body } : query;
@@ -105,6 +175,13 @@ function extractTokenData(
     exp: stringField(source.exp),
     sig: stringField(source.sig),
     question: stringField(source.q),
+    pageHeading: stringField(source.title),
+    styleBarText: stringField(source.sbt),
+    styleBarColor: stringField(source.sbc),
+    approveButtonLabel: stringField(source.apl),
+    rejectButtonLabel: stringField(source.rjl),
+    respondButtonLabel: stringField(source.rsl),
+    customCss: rawStringField(source.css),
     answerText: stringField(source.answer || source.response || source.text),
   };
 }
@@ -185,19 +262,37 @@ export class WaitForHitlResponse implements INodeType {
     const method = String(request.method || 'GET').toUpperCase();
 
     if (method !== 'GET' && method !== 'POST') {
-      response.status(405).send(renderPage('Method Not Allowed', 'Only GET and POST are supported.'));
+      response.status(405).send(
+        renderPage({
+          title: 'Method Not Allowed',
+          message: 'Only GET and POST are supported.',
+          theme: {
+            heading: 'Human Review Required',
+            styleBarText: 'Human in the Loop',
+            styleBarColor: '#0f766e',
+            customCss: '',
+          },
+        }),
+      );
       return { noWebhookResponse: true };
     }
 
     const query = (request.query || {}) as Record<string, unknown>;
     const body = (this.getBodyData() || {}) as Record<string, unknown>;
     const tokenData = extractTokenData(method, query, body);
+    const theme = getThemeFromTokenData(tokenData);
 
     const credentials = await this.getCredentials('hitlSigningApi');
     const signingSecret = String(credentials.signingSecret ?? '').trim();
 
     if (!signingSecret) {
-      response.status(500).send(renderPage('Configuration Error', 'Signing secret is not configured.'));
+      response.status(500).send(
+        renderPage({
+          title: 'Configuration Error',
+          message: 'Signing secret is not configured.',
+          theme,
+        }),
+      );
       return { noWebhookResponse: true };
     }
 
@@ -214,18 +309,42 @@ export class WaitForHitlResponse implements INodeType {
 
     if (!verification.valid || !verification.token) {
       if (verification.status === 'expired') {
-        response.status(410).send(renderPage('Link Expired', 'This approval link has expired.'));
+        response.status(410).send(
+          renderPage({
+            title: 'Link Expired',
+            message: 'This approval link has expired.',
+            theme,
+          }),
+        );
       } else if (verification.status === 'invalid_signature') {
-        response.status(401).send(renderPage('Invalid Signature', 'The link signature is invalid.'));
+        response.status(401).send(
+          renderPage({
+            title: 'Invalid Signature',
+            message: 'The link signature is invalid.',
+            theme,
+          }),
+        );
       } else {
-        response.status(400).send(renderPage('Invalid Request', 'Required link parameters are missing or invalid.'));
+        response.status(400).send(
+          renderPage({
+            title: 'Invalid Request',
+            message: 'Required link parameters are missing or invalid.',
+            theme,
+          }),
+        );
       }
       return { noWebhookResponse: true };
     }
 
     if (method === 'GET' && verification.token.decision === 'respond') {
       if (!replayGuard.canRender(verification.token.requestId, verification.token.exp)) {
-        response.status(409).send(renderPage('Already Processed', 'This request was already answered.'));
+        response.status(409).send(
+          renderPage({
+            title: 'Already Processed',
+            message: 'This request was already answered.',
+            theme,
+          }),
+        );
         return { noWebhookResponse: true };
       }
 
@@ -234,7 +353,12 @@ export class WaitForHitlResponse implements INodeType {
       response.send(
         renderRespondForm({
           requestId: verification.token.requestId,
+          heading: theme.heading,
           question: tokenData.question,
+          styleBarText: theme.styleBarText,
+          styleBarColor: theme.styleBarColor,
+          customCss: theme.customCss,
+          submitLabel: normalizeLabel(tokenData.respondButtonLabel, 'Submit'),
           nonce: verification.token.nonce,
           exp: verification.token.exp,
           sig: tokenData.sig,
@@ -248,7 +372,13 @@ export class WaitForHitlResponse implements INodeType {
     const requireTextForRespond = Boolean(this.getNodeParameter('requireTextForRespond', 0, true));
 
     if (verification.token.decision === 'respond' && requireTextForRespond && !tokenData.answerText) {
-      response.status(400).send(renderPage('Response Missing', 'A text response is required.'));
+      response.status(400).send(
+        renderPage({
+          title: 'Response Missing',
+          message: 'A text response is required.',
+          theme,
+        }),
+      );
       return { noWebhookResponse: true };
     }
 
@@ -264,14 +394,30 @@ export class WaitForHitlResponse implements INodeType {
           ? 'This approval link has expired.'
           : 'This request was already answered by another user.';
 
-      response.status(409).send(renderPage('Request Already Closed', message));
+      response.status(409).send(
+        renderPage({
+          title: 'Request Already Closed',
+          message,
+          theme,
+        }),
+      );
       return { noWebhookResponse: true };
     }
 
     const status = verification.token.decision === 'reject' ? 'rejected' : 'answered';
+    const decisionLabel =
+      verification.token.decision === 'approve'
+        ? normalizeLabel(tokenData.approveButtonLabel, 'Approve')
+        : verification.token.decision === 'reject'
+          ? normalizeLabel(tokenData.rejectButtonLabel, 'Reject')
+          : normalizeLabel(tokenData.respondButtonLabel, 'Response');
 
     return {
-      webhookResponse: renderPage('Response Recorded', 'Your response was recorded. This page can be closed.'),
+      webhookResponse: renderPage({
+        title: theme.heading,
+        message: `${decisionLabel} recorded. This page can be closed.`,
+        theme,
+      }),
       workflowData: [
         [
           {
@@ -282,6 +428,7 @@ export class WaitForHitlResponse implements INodeType {
               answerText: tokenData.answerText || null,
               respondedAt: new Date().toISOString(),
               fallbackUsed: false,
+              branding: theme,
               raw: {
                 method,
                 query,

@@ -63,6 +63,20 @@ This ensures human responses are processed by the AI runtime, not pasted directl
 - For correct tests always execute the full chain:
   - `Create HITL Link -> Send channel node -> Wait For HITL Response`
 
+## Branding options (CI / Design)
+
+In **Create HITL Link** you can now configure:
+
+- `Page Heading`
+- `Stylebar Text`
+- `Stylebar Color`
+- `Approve Button Label`
+- `Reject Button Label`
+- `Respond Button Label`
+- `Custom CSS`
+
+These values are passed to the human response page rendered by **Wait For HITL Response**.
+
 ## Timeout behavior
 
 - `chat` mode default: 1 hour

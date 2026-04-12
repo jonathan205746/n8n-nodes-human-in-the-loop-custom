@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-human-in-the-loop-custom",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "n8n Community Node for human-in-the-loop link generation and wait/resume workflows",
   "license": "MIT",
   "homepage": "https://github.com/DNAngelX/n8n-nodes-human-in-the-loop-custom",

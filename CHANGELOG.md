@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.2
+
+- Added configurable branding for HITL response pages:
+  - page heading
+  - stylebar text and color
+  - custom button labels
+  - custom CSS
+- Passed branding values from `Create HITL Link` to `Wait For HITL Response` rendering
+- Improved response/confirmation page theming consistency
+
 ## 0.1.1
 
 - Added SVG icons for both nodes and credentials for n8n review compatibility

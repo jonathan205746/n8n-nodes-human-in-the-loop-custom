@@ -23,6 +23,9 @@ function buildMessageMarkdown(params: {
   question: string;
   responseMode: ResponseMode;
   links: Record<HitlDecision, string>;
+  approveButtonLabel: string;
+  rejectButtonLabel: string;
+  respondButtonLabel: string;
   requestId: string;
   waitUntilIso: string;
   fallbackResponse: string;
@@ -40,12 +43,12 @@ function buildMessageMarkdown(params: {
   lines.push('### Actions');
 
   if (params.responseMode === 'approval' || params.responseMode === 'approvalWithText') {
-    lines.push(`- Approve: ${params.links.approve}`);
-    lines.push(`- Reject: ${params.links.reject}`);
+    lines.push(`- ${params.approveButtonLabel}: ${params.links.approve}`);
+    lines.push(`- ${params.rejectButtonLabel}: ${params.links.reject}`);
   }
 
   if (params.responseMode === 'approvalWithText' || params.responseMode === 'freeText') {
-    lines.push(`- Provide Details: ${params.links.respond}`);
+    lines.push(`- ${params.respondButtonLabel}: ${params.links.respond}`);
   }
 
   lines.push('');
@@ -107,6 +110,70 @@ export class CreateHitlLink implements INodeType {
         ],
         default: 'approvalWithText',
         description: 'Expected response mode from human reviewers.',
+      },
+      {
+        displayName: 'Page Heading',
+        name: 'pageHeading',
+        type: 'string',
+        default: 'Human Review Required',
+        description: 'Main heading shown on the human response page.',
+      },
+      {
+        displayName: 'Stylebar Text',
+        name: 'styleBarText',
+        type: 'string',
+        default: 'Human in the Loop',
+      },
+      {
+        displayName: 'Stylebar Color',
+        name: 'styleBarColor',
+        type: 'string',
+        default: '#0f766e',
+        description: 'Hex color for top stylebar (for example #0f766e).',
+      },
+      {
+        displayName: 'Approve Button Label',
+        name: 'approveButtonLabel',
+        type: 'string',
+        default: 'Approve',
+        displayOptions: {
+          show: {
+            responseMode: ['approval', 'approvalWithText'],
+          },
+        },
+      },
+      {
+        displayName: 'Reject Button Label',
+        name: 'rejectButtonLabel',
+        type: 'string',
+        default: 'Reject',
+        displayOptions: {
+          show: {
+            responseMode: ['approval', 'approvalWithText'],
+          },
+        },
+      },
+      {
+        displayName: 'Respond Button Label',
+        name: 'respondButtonLabel',
+        type: 'string',
+        default: 'Provide Details',
+        displayOptions: {
+          show: {
+            responseMode: ['approvalWithText', 'freeText'],
+          },
+        },
+      },
+      {
+        displayName: 'Custom CSS',
+        name: 'customCss',
+        type: 'string',
+        default: '',
+        typeOptions: {
+          rows: 10,
+          editor: 'cssEditor',
+        },
+        description: 'Optional custom CSS appended to the response page for CI branding.',
       },
       {
         displayName: 'Resume URL',
@@ -239,6 +306,14 @@ export class CreateHitlLink implements INodeType {
         }
 
         const responseMode = this.getNodeParameter('responseMode', i, 'approvalWithText') as ResponseMode;
+        const pageHeading = String(this.getNodeParameter('pageHeading', i, 'Human Review Required')).trim();
+        const styleBarText = String(this.getNodeParameter('styleBarText', i, 'Human in the Loop')).trim();
+        const styleBarColor = String(this.getNodeParameter('styleBarColor', i, '#0f766e')).trim();
+        const approveButtonLabel = String(this.getNodeParameter('approveButtonLabel', i, 'Approve')).trim() || 'Approve';
+        const rejectButtonLabel = String(this.getNodeParameter('rejectButtonLabel', i, 'Reject')).trim() || 'Reject';
+        const respondButtonLabel =
+          String(this.getNodeParameter('respondButtonLabel', i, 'Provide Details')).trim() || 'Provide Details';
+        const customCss = String(this.getNodeParameter('customCss', i, ''));
         const resumeUrl = String(this.getNodeParameter('resumeUrl', i, '')).trim();
         if (!resumeUrl) {
           throw new NodeOperationError(this.getNode(), 'Resume URL is required', { itemIndex: i });
@@ -286,6 +361,13 @@ export class CreateHitlLink implements INodeType {
             signingSecret,
             {
               q: question,
+              title: pageHeading,
+              sbt: styleBarText,
+              sbc: styleBarColor,
+              apl: approveButtonLabel,
+              rjl: rejectButtonLabel,
+              rsl: respondButtonLabel,
+              css: customCss,
             },
           );
 
@@ -300,6 +382,9 @@ export class CreateHitlLink implements INodeType {
           question,
           responseMode,
           links,
+          approveButtonLabel,
+          rejectButtonLabel,
+          respondButtonLabel,
           requestId,
           waitUntilIso: timeoutPlan.waitUntilIso,
           fallbackResponse,
@@ -332,6 +417,15 @@ export class CreateHitlLink implements INodeType {
               subject,
               markdown,
               text: markdown,
+            },
+            branding: {
+              pageHeading,
+              styleBarText,
+              styleBarColor,
+              approveButtonLabel,
+              rejectButtonLabel,
+              respondButtonLabel,
+              customCss,
             },
             runtimeHints: [
               'Open links only while the same execution is waiting in "Wait For HITL Response".',
