@@ -38,6 +38,7 @@ function renderPage(title: string, message: string): string {
 
 function renderRespondForm(params: {
   requestId: string;
+  question: string;
   nonce: string;
   exp: number;
   sig: string;
@@ -61,6 +62,7 @@ function renderRespondForm(params: {
 <body>
   <div class="card">
     <h1>Provide HITL Response</h1>
+    <p><strong>Question:</strong> ${escapeHtml(params.question || '(no question provided)')}</p>
     <form method="post" action="${escapeHtml(params.actionUrl)}">
       <input type="hidden" name="requestId" value="${escapeHtml(params.requestId)}" />
       <input type="hidden" name="decision" value="respond" />
@@ -91,6 +93,7 @@ function extractTokenData(
   nonce: string;
   exp: string;
   sig: string;
+  question: string;
   answerText: string;
 } {
   const source = method === 'POST' ? { ...query, ...body } : query;
@@ -101,6 +104,7 @@ function extractTokenData(
     nonce: stringField(source.nonce),
     exp: stringField(source.exp),
     sig: stringField(source.sig),
+    question: stringField(source.q),
     answerText: stringField(source.answer || source.response || source.text),
   };
 }
@@ -109,7 +113,7 @@ export class WaitForHitlResponse implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'Wait For HITL Response',
     name: 'waitForHitlResponse',
-    icon: 'fa:hourglass-half',
+    icon: 'file:hitl.svg',
     group: ['organization'],
     version: 1,
     description: 'Wait for signed human response callbacks and resume workflow',
@@ -131,7 +135,7 @@ export class WaitForHitlResponse implements INodeType {
         httpMethod: 'GET',
         responseMode: 'onReceived',
         responseData: '',
-        path: '={{ $nodeId }}',
+        path: '',
         restartWebhook: true,
         isFullPath: true,
       },
@@ -140,7 +144,7 @@ export class WaitForHitlResponse implements INodeType {
         httpMethod: 'POST',
         responseMode: 'onReceived',
         responseData: '',
-        path: '={{ $nodeId }}',
+        path: '',
         restartWebhook: true,
         isFullPath: true,
       },
@@ -225,12 +229,12 @@ export class WaitForHitlResponse implements INodeType {
         return { noWebhookResponse: true };
       }
 
-      const basePath = String(request.query && request.query._path ? request.query._path : '');
-      const actionUrl = basePath || '';
+      const actionUrl = '';
 
       response.send(
         renderRespondForm({
           requestId: verification.token.requestId,
+          question: tokenData.question,
           nonce: verification.token.nonce,
           exp: verification.token.exp,
           sig: tokenData.sig,

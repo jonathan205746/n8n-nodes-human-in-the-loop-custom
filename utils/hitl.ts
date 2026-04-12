@@ -124,7 +124,12 @@ export function signToken(token: SignedToken, secret: string): string {
   return createHmac('sha256', secret).update(canonicalizeToken(token)).digest('hex');
 }
 
-export function buildSignedUrl(baseUrl: string, token: SignedToken, secret: string): string {
+export function buildSignedUrl(
+  baseUrl: string,
+  token: SignedToken,
+  secret: string,
+  extraParams: Record<string, string> = {},
+): string {
   const signature = signToken(token, secret);
   const params = new URLSearchParams({
     requestId: token.requestId,
@@ -132,6 +137,7 @@ export function buildSignedUrl(baseUrl: string, token: SignedToken, secret: stri
     nonce: token.nonce,
     exp: String(token.exp),
     sig: signature,
+    ...extraParams,
   });
   return appendQuery(baseUrl, params);
 }

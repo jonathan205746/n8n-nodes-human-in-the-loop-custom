@@ -60,6 +60,7 @@ declare module 'n8n-workflow' {
     name: string;
     displayName: string;
     documentationUrl?: string;
+    icon?: string;
     properties: unknown[];
     test?: unknown;
   }

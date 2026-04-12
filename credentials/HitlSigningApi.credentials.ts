@@ -7,6 +7,8 @@ export class HitlSigningApi implements ICredentialType {
 
   documentationUrl = 'https://github.com/DNAngelX/n8n-nodes-human-in-the-loop-custom';
 
+  icon = 'file:hitl.svg';
+
   properties: INodeProperties[] = [
     {
       displayName: 'Signing Secret',

@@ -54,6 +54,15 @@ Use a long random secret (for example generated via password manager).
 
 This ensures human responses are processed by the AI runtime, not pasted directly into an end-user chat response.
 
+## Important runtime behavior
+
+- HITL links target `webhook-waiting/<executionId>`.
+- They only work while the same execution is waiting in **Wait For HITL Response**.
+- If you run only `Create HITL Link` (without reaching `Wait For HITL Response`), link clicks return:
+  - `The execution "<id>" has finished already.`
+- For correct tests always execute the full chain:
+  - `Create HITL Link -> Send channel node -> Wait For HITL Response`
+
 ## Timeout behavior
 
 - `chat` mode default: 1 hour

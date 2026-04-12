@@ -59,7 +59,7 @@ export class CreateHitlLink implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'Create HITL Link',
     name: 'createHitlLink',
-    icon: 'fa:user-clock',
+    icon: 'file:hitl.svg',
     group: ['transform'],
     version: 1,
     description: 'Create signed Human-in-the-Loop response links and SLA metadata',
@@ -284,6 +284,9 @@ export class CreateHitlLink implements INodeType {
               exp: timeoutPlan.expUnix,
             },
             signingSecret,
+            {
+              q: question,
+            },
           );
 
         const links: Record<HitlDecision, string> = {
@@ -330,6 +333,11 @@ export class CreateHitlLink implements INodeType {
               markdown,
               text: markdown,
             },
+            runtimeHints: [
+              'Open links only while the same execution is waiting in "Wait For HITL Response".',
+              'If the execution already ended, n8n returns: "The execution has finished already."',
+              'Typical order: Create HITL Link -> Send (email/telegram/...) -> Wait For HITL Response.',
+            ],
             context,
           },
           pairedItem: { item: i },

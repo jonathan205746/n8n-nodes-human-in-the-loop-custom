@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-human-in-the-loop-custom",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "n8n Community Node for human-in-the-loop link generation and wait/resume workflows",
   "license": "MIT",
   "homepage": "https://github.com/DNAngelX/n8n-nodes-human-in-the-loop-custom",
@@ -25,7 +25,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "build": "rm -rf dist && tsc -p tsconfig.json && mkdir -p dist/credentials dist/nodes/CreateHitlLink dist/nodes/WaitForHitlResponse && cp credentials/hitl.svg dist/credentials/hitl.svg && cp nodes/CreateHitlLink/hitl.svg dist/nodes/CreateHitlLink/hitl.svg && cp nodes/WaitForHitlResponse/hitl.svg dist/nodes/WaitForHitlResponse/hitl.svg",
     "build:watch": "tsc -p tsconfig.json --watch",
     "dev": "npm run build:watch",
     "lint": "tsc -p tsconfig.json --noEmit",
